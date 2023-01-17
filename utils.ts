@@ -15,6 +15,8 @@ export const exampleString = `{
 const handleArray = (value: any[], key: string) => {
   let interfaceString = "";
   const interfaceToLater = [];
+  const typesToLate: string[] = [];
+  const repeatedKeys: string[] = [];
   const typeOfArray = value.map((v) => typeof v);
 
   const simplestypes = ["string", "number", "boolean"];
@@ -24,24 +26,28 @@ const handleArray = (value: any[], key: string) => {
   ) {
     interfaceString += `${typeof value[0]}[]`;
   } else {
+    interfaceString += `Array<`;
     value.forEach((v) => {
       if (Array.isArray(v)) {
         const result = handleArray(v, key);
 
-        interfaceString += "Array<" + result.interfaceString;
-
+        typesToLate.push(result.interfaceString);
         interfaceToLater.push(...result.interfaceToLater);
       } else if (typeof v === "object") {
-        interfaceString += `Array<${key}Class`;
-
-        interfaceToLater.push({ key, value: v });
+        let auxKey = key;
+        while (repeatedKeys.includes(auxKey)) {
+          auxKey += "_" + key;
+        }
+        typesToLate.push(`${auxKey}Class`);
+        interfaceToLater.push({ key: auxKey, value: v });
+        repeatedKeys.push(auxKey);
       } else {
-        interfaceString += `Array<${typeof v}`;
+        typesToLate.push(`${typeof v}`);
       }
-      interfaceString += " | ";
     });
-    interfaceString = interfaceString.slice(0, -3);
-    interfaceString += `>`;
+    interfaceString += typesToLate.filter((v, i) =>
+      typesToLate.indexOf(v) === i
+    ).join(" | ") + ">";
   }
   return { interfaceString, interfaceToLater };
 };
@@ -51,13 +57,15 @@ export const jsonToInterface = (
   name: string = "Example",
 ) => {
   const interfaceToLater = [];
+
   let interfaceString = "";
   const simplestypes = ["string", "number", "boolean"];
   for (const key in json) {
     const value = json[key];
     if (Array.isArray(value)) {
       const result = handleArray(value, key);
-      interfaceString += `\t${key}: ` + result.interfaceString + "\n";
+      interfaceString += `\t${key}: ` + result.interfaceString +
+        "\n";
       interfaceToLater.push(...result.interfaceToLater);
     } else if (simplestypes.includes(typeof value)) {
       interfaceString += `\t${key}: ${typeof value};\n`;
@@ -68,8 +76,18 @@ export const jsonToInterface = (
   }
   interfaceString += "}";
 
+  const repeat: string[] = interfaceToLater.filter((
+    v,
+    i,
+  ) => (interfaceToLater.indexOf(v) === i)).map((
+    v,
+  ) => v.key);
+
+  const keysRepeated: string[] = [];
+
   interfaceToLater.forEach(({ key, value }) => {
-    interfaceString += "\n\n" + jsonToInterface(value, `${key}Class`);
+    interfaceString += "\n\n" +
+      jsonToInterface(value, `${key}Class`);
   });
 
   return `interface ${name} {\n` + interfaceString;

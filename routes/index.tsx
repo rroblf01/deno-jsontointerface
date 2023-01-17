@@ -6,6 +6,7 @@ export default function Home() {
     <>
       <Head>
         <title>Json to Interface</title>
+        <link rel="icon" href="/logo.jpeg" type="image/x-icon"></link>
       </Head>
       <main class="bg-[#C09F80] text-[#565656] min-h-screen font-sans">
         <JsonToInterface />
