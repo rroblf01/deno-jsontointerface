@@ -57,7 +57,7 @@ export const jsonToInterface = (
     const value = json[key];
     if (Array.isArray(value)) {
       const result = handleArray(value, key);
-      interfaceString += "\t" + result.interfaceString + "\n";
+      interfaceString += `\t${key}: ` + result.interfaceString + "\n";
       interfaceToLater.push(...result.interfaceToLater);
     } else if (simplestypes.includes(typeof value)) {
       interfaceString += `\t${key}: ${typeof value};\n`;

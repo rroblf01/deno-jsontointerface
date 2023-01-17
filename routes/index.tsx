@@ -7,7 +7,7 @@ export default function Home() {
       <Head>
         <title>Json to Interface</title>
       </Head>
-      <main class="bg-gray-500 min-h-screen font-sans">
+      <main class="bg-[#C09F80] text-[#565656] min-h-screen font-sans">
         <JsonToInterface />
       </main>
     </>
